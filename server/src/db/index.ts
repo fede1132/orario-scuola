@@ -3,6 +3,7 @@ import { epochTime } from "../util/epoch"
 
 import Ban from "./model/ban"
 import Mail from "./model/mail"
+import CachedRoute from "./model/cache"
 
 class Database {
     private db
@@ -12,7 +13,8 @@ class Database {
             this.db.prepare('CREATE TABLE IF NOT EXISTS settings ( `schedule_url` TEXT)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS fail2ban ( `type` INTEGER, `id` TEXT, `time` INTEGER, `unban` INTEGER)').run()
-            this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` TEXT, `code` INTEGER)').run()
+            this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` INTEGER, `code` INTEGER)').run()
+            this.db.prepare('CREATE TABLE IF NOT EXISTS cache (`route` TEXT, `time` INTEGER, `content` TEXT)').run()
         } catch (e) {
             if (e) console.log(`❌ Got an error while trying to use sqlite3 storage! Error:\n${e}`)
         }
@@ -112,6 +114,21 @@ class Database {
     getMailCode(email: string): number | undefined {
         let row = this.db.prepare("SELECT code FROM mails WHERE email = ? AND code NOT null").get(email)
         return row.code
+    }
+
+    // Cache methods
+    getCache(route: string): CachedRoute | undefined {
+        let row = this.db.prepare("SELECT * FROM cache WHERE route = ?").get(route)
+        if (row === undefined) return undefined
+        return new CachedRoute(row.route, row.time, row.content)
+    }
+
+    updateCache(route: string, content: string) {
+        if (this.getCache(route)===undefined) {
+            this.db.prepare("INSERT INTO cache (route, time, content) VALUES (?, ?, ?)").run(route, epochTime(), content)
+            return
+        }
+        this.db.prepare("UPDATE cache SET time = ? AND content = ? WHERE route = ?").run(epochTime(), content, route)
     }
 
 }
