@@ -100,7 +100,6 @@ class Database {
             let mail = new Mail(row.email, row.time)
             mails.push(mail)
         }
-        console.log(mails)
         return mails
     }
 

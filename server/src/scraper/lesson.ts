@@ -1,9 +1,10 @@
 interface Lesson {
     name?: string,
-    teachers: string[],
+    teachers?: string[],
     room?: string,
     colspan: number,
-    rowspan: number
+    rowspan: number,
+    empty?: boolean
 }
 
 export default Lesson

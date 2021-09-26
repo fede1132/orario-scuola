@@ -17,6 +17,7 @@ class Mail {
                 return
             }
             let code = genCode()
+            console.log(`Code: ${code}`)
             //await mail.sendCode("fendt873@gmail.com", code);
             db.newMail(email, code)
             res.status(200).send({success: true, code: "email.sent"})

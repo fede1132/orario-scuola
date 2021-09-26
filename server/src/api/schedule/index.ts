@@ -32,12 +32,12 @@ class Schedule {
 
         this.router.get('/getSchedule/:type/:value', auth, async (req, res) => {
             let route = req.url.substr(0, req.url.indexOf("?"))
-            let cache = db.getCache(route)
+            //let cache = db.getCache(route)
+            let cache: any = undefined
             if (cache !== undefined && cache.time+parseInt(process.env.CACHE_TIME!) < epochTime()) {
                 res.status(200).send({success: true, cache: true, code: "schedule.received", data: JSON.parse(cache.content)})
                 return
             }
-
             let type: string | undefined = <string | undefined>req.params.type
             let value: string | undefined = <string | undefined>req.params.value
             if (type === undefined || parseInt(type) >= this.types.length) {
