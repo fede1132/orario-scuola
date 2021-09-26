@@ -105,10 +105,13 @@ export async function scrape(html: string) {
         // iterate over the unsorted lessons
         for (let index in unsorted[hour]) {
             let lesson = unsorted[hour][index]
+            if (lesson.colspan < defaultColspan
+                && sorted[hours[hour]][day-1][0].colspan !== defaultColspan
+                && sorted[hours[hour]][day-1].length !== defaultColspan) {
+                --day
+            }
             for (let i=0;i<lesson.rowspan;i++) {
-                for (let j=0;j<Math.floor(defaultColspan/lesson.colspan);j++) {
-                    sorted[hours[hour+i]][day].push(lesson)
-                }
+                sorted[hours[hour+i]][day].push(lesson)
             }
             // scan for the next empty day
             while (sorted[hours[hour]][day].length !== 0) {

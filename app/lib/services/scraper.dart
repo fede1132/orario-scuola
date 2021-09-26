@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:orario_scuola/services/algorithm.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_scraper/web_scraper.dart';
 import 'package:http/http.dart' as http;
@@ -19,8 +18,6 @@ class Scraper {
     var scraper = WebScraper('http://istitutogobetti.it');
     if (await scraper.loadWebPage('/2020')) {
       var elements = scraper.getElement("#jsn-pos-left > div:nth-child(1) > div > div > div > div > ul > li", ['children']).map((e) => e['title']).toList();
-      var result = ScraperAlgorithm().scan(elements);
-      print(result);
     }
   }
 
