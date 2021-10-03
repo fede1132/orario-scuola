@@ -1,5 +1,6 @@
 import express, { Application, Router } from "express"
 import { fail2ban } from "../"
+import AgreeTOS from "./agree-tos"
 
 import Mail from './mail'
 import Schedule from './schedule'
@@ -12,6 +13,7 @@ class API {
         if (process.argv.indexOf('--v') !== -1) app.use(require('morgan')('combined'))
         if (process.argv.indexOf('--no-fail2ban') === -1) app.use(fail2ban.middleware)
 
+        app.use('/agree-tos', new AgreeTOS().router)
         app.use('/mail', new Mail().router)
         app.use('/schedule', new Schedule().router)
         app.use('/token', new Token().router)

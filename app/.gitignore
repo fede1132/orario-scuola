@@ -34,18 +34,13 @@
 # Web related
 lib/generated_plugin_registrant.dart
 
-# Firebase settings
-google-services.json
-GoogleServices-Info.plist
-
-# Key settings
-key.properties
-
 # Symbolication related
 app.*.symbols
 
 # Obfuscation related
 app.*.map.json
 
-# Lock files
-pubspec.lock
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release

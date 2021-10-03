@@ -58,6 +58,7 @@ export async function scrape(html: string) {
                 line = data.nextLine() // teachers & room
             }
             if (lessonData.length===1) {
+                if (unsorted[row] === undefined) unsorted[row] = []
                 unsorted[row].push({
                     colspan: 1,
                     rowspan: 1,

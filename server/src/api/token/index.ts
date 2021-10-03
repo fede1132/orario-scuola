@@ -27,7 +27,7 @@ class Token {
                 return
             }
             let token = db.getToken(email!)
-            res.status(200).send({success: true, token: token})
+            res.status(200).send({success: true, code: "token.received", token: token})
         })
 
     }

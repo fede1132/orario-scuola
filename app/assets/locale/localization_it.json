@@ -1,0 +1,21 @@
+{
+    "appbar.title.default": "Orario Scuola",
+    "appbar.title.tos": "Termini e condizioni",
+
+    "textfield.email": "Indirizzo email",
+
+    "dialog.close": "Chiudi",
+
+    "email.invalid.title": "Email errata",
+    "email.invalid": "Email errata, riprova.",
+
+    "url.not-present": "Url non presente nella richiesta",
+
+    "token.not-admin": "Non hai i permessi di amministratore!",
+
+    "token.invalid.title": "Token errato",
+    "token.invalid": "Il server ha riportato un errore riguardante il tuo codice di accesso. Sei pregato di re-inserire la tua email dopo aver premuto \"Chiudi\".",
+
+    "banned.http": "Ehi.. rallenta! Sei stato bloccato dai nostri server per 1 ora."
+
+}

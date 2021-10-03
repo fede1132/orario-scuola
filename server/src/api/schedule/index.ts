@@ -35,6 +35,7 @@ class Schedule {
             //let cache = db.getCache(route)
             let cache: any = undefined
             if (cache !== undefined && cache.time+parseInt(process.env.CACHE_TIME!) < epochTime()) {
+                console.log("cached")
                 res.status(200).send({success: true, cache: true, code: "schedule.received", data: JSON.parse(cache.content)})
                 return
             }
