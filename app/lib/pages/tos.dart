@@ -41,7 +41,7 @@ class _TOS extends State<TOS> {
               child: SingleChildScrollView(
                 child: Column(
                   children: <Widget>[
-                    Text("Invio dati", style: theme.textTheme.headline1),
+                    Text("Invio dati", style: theme.textTheme.headline4),
                     ListTile(
                       title: const Text("Accetto di condividere dati statistici in forma anonima con gli sviluppatori dell'app, ai fini del miglioramento di essa."),
                       leading: Radio<SingingCharacter>(
@@ -58,9 +58,11 @@ class _TOS extends State<TOS> {
                         onChanged: updateRadio,
                       ),
                     ),
-                    Text("Email istituzionale", style: theme.textTheme.headline1),
+                    const SizedBox(height: 20),
+                    Text("Email istituzionale", style: theme.textTheme.headline4),
                     Padding(
                       child: TextFormField(
+                        autocorrect: false,
                         controller: _controller,
                         decoration: InputDecoration(
                           border: const UnderlineInputBorder(),
@@ -94,6 +96,7 @@ class _TOS extends State<TOS> {
                         }
                         var box = await Hive.openBox("settings");
                         box.put("token", api.value);
+                        box.put("send_anon_data", _character == SingingCharacter.yes ? true : false);
                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const Home()));
                       },
                       style: ButtonStyle(

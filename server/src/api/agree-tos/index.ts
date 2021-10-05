@@ -4,7 +4,7 @@ import { db } from "../.."
 class AgreeTOS {
     router: Router = Router()
     constructor() {
-        this.router.get('/agree-tos', async (req, res) => {
+        this.router.post('/agree-tos', async (req, res) => {
             let email = req.query.email?.toString()
             let agree = req.query.agree?.toString()
             if (email === undefined || !email.includes("@") || !email.split("@")[0].includes(".") || !email.endsWith("@gobettire.istruzioneer.it")) {

@@ -127,7 +127,7 @@ class Database {
             this.db.prepare("INSERT INTO cache (route, time, content) VALUES (?, ?, ?)").run(route, epochTime(), content)
             return
         }
-        this.db.prepare("UPDATE cache SET time = ? AND content = ? WHERE route = ?").run(epochTime(), content, route)
+        this.db.prepare("UPDATE cache SET content = ?, time = ? WHERE route = ?").run(content.toString(), epochTime(), route)
     }
 
 }

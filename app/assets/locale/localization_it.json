@@ -1,10 +1,18 @@
 {
     "appbar.title.default": "Orario Scuola",
     "appbar.title.tos": "Termini e condizioni",
+    "appbar.title.settings": "Impostazioni",
+    "appbar.title.select": "Seleziona il tuo orario",
+
+    "settings.teachers_names": "Mostra nomi prof",
+    "settings.teachers_names.desc": "Mostra o nasconde i nomi dei professori nelle caselle dell'orario",
 
     "textfield.email": "Indirizzo email",
 
     "dialog.close": "Chiudi",
+
+    "internet.not-connected.title": "Non sei connesso!",
+    "internet.not-connected": "Nessun accesso ad internet!\nRiprova quando avrai accesso ad internet!",
 
     "email.invalid.title": "Email errata",
     "email.invalid": "Email errata, riprova.",

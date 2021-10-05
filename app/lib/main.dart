@@ -45,6 +45,7 @@ class _App extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Orario Scuola',
       localizationsDelegates: const [
         AppLocalizationsDelegate(),

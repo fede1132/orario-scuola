@@ -5,6 +5,11 @@ class Data {
         this._array = array
     }
 
+    skip(val: number): string {
+        this._index += val;
+        return this._array[this._index]
+    }
+
     currentLine(): string {
         if (this._index < 0 || this._index >= this._array.length) return ""
         return this._array[this._index]

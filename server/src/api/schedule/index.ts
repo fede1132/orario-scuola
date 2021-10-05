@@ -2,7 +2,7 @@ import { Router } from "express"
 import { db } from "../.."
 import auth from "../../auth"
 import axios from "axios"
-import { scrape } from "../../scraper"
+import { scrape, scrapeValues } from "../../scraper"
 import { epochTime } from "../../util/epoch"
 
 
@@ -12,7 +12,7 @@ class Schedule {
 
     constructor() {
 
-        this.router.get('/updateSchedule', auth, async (req, res) => {
+        this.router.post('/updateSchedule', auth, async (req, res) => {
             let url: string | undefined = <string | undefined>req.query.url
             let token: string | undefined = <string | undefined>req.query.token
             if (url===undefined) {
@@ -30,12 +30,11 @@ class Schedule {
             res.status(200).send({success: true, code:"schedule.updated"})
         })
 
-        this.router.get('/getSchedule/:type/:value', auth, async (req, res) => {
+        this.router.post('/getSchedule/:type/:value', auth, async (req, res) => {
             let route = req.url.substr(0, req.url.indexOf("?"))
             //let cache = db.getCache(route)
             let cache: any = undefined
-            if (cache !== undefined && cache.time+parseInt(process.env.CACHE_TIME!) < epochTime()) {
-                console.log("cached")
+            if (cache !== undefined && cache.time+parseInt(process.env.CACHE_TIME!) > epochTime()) {
                 res.status(200).send({success: true, cache: true, code: "schedule.received", data: JSON.parse(cache.content)})
                 return
             }
@@ -51,6 +50,19 @@ class Schedule {
             }
             const response = await axios.get(`${db.getScheduleUrl()}/${this.types[parseInt(type)]}/${value}${value.endsWith(".html")?"":".html"}`)
             const scraped = await scrape(response.data)
+            db.updateCache(route, JSON.stringify(scraped))
+            res.status(200).send({success: true, cache: false, code: "schedule.received", data: scraped})
+        })
+
+        this.router.post('/getValues', auth, async (req, res) => {
+            let route = req.url.substr(0, req.url.indexOf("?"))
+            let cache = db.getCache(route)
+            if (cache !== undefined && cache.time+parseInt(process.env.CACHE_TIME!) > epochTime()) {
+                res.status(200).send({success: true, cache: true, code: "schedule.received", data: JSON.parse(cache.content)})
+                return
+            }
+            const response = await axios.get(`${db.getScheduleUrl()}`)
+            const scraped = await scrapeValues(response.data)
             db.updateCache(route, JSON.stringify(scraped))
             res.status(200).send({success: true, cache: false, code: "schedule.received", data: scraped})
         })

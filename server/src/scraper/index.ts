@@ -1,8 +1,27 @@
 import Data from './data'
 import Lesson from './lesson'
 
+export async function scrapeValues(html: string) {
+    const data = new Data(html.replace("&nbsp;", "").replace(/^\s*\n/gm, "").split(/\r?\n/))
+    let line = data.nextLine()
+    let values: any = []
+    while (true) {
+        if (line.startsWith("<TD")) {
+            let key = values.length
+            values[key] = []
+            line = data.skip(3)
+            while (line !== "</TD>") {
+                values[key].push(line.substr(line.indexOf(">")+1, (line.indexOf("</A")-line.indexOf(">")-1)))
+                line = data.nextLine()
+            }
+        }
+        if (values.length >= 3) break; 
+        line = data.nextLine()
+    }
+    return values
+}
+
 export async function scrape(html: string) {
-    console.log(typeof html)
     const data = new Data(html.replace("&nbsp;", "").replace(/^\s*\n/gm, "").split(/\r?\n/))
     // raw data
     let hours = []
@@ -105,22 +124,23 @@ export async function scrape(html: string) {
         let hour = parseInt(str)
         // iterate over the unsorted lessons
         for (let index in unsorted[hour]) {
+            // scan for the next empty day
+            while (sorted[hours[hour]][day].length > 0) {
+                day++
+                if (day>5) {
+                    day = 5
+                    break
+                }
+            }
             let lesson = unsorted[hour][index]
             if (lesson.colspan < defaultColspan
+                && sorted[hours[hour]][day-1] !== undefined
                 && sorted[hours[hour]][day-1][0].colspan !== defaultColspan
                 && sorted[hours[hour]][day-1].length !== defaultColspan) {
                 --day
             }
             for (let i=0;i<lesson.rowspan;i++) {
                 sorted[hours[hour+i]][day].push(lesson)
-            }
-            // scan for the next empty day
-            while (sorted[hours[hour]][day].length !== 0) {
-                day++
-                if (day>5) {
-                    day = 5
-                    break
-                }
             }
         }
     }

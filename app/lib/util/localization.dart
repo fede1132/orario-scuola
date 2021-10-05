@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show SynchronousFuture;
 import 'package:flutter/services.dart';
 
 class AppLocalizations {
 
-  static final AppLocalizations _singleton = new AppLocalizations._internal();
+  static final AppLocalizations _singleton = AppLocalizations._internal();
   AppLocalizations._internal();
   static AppLocalizations get instance => _singleton;
 
