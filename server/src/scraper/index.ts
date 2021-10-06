@@ -22,7 +22,7 @@ export async function scrapeValues(html: string) {
 }
 
 export async function scrape(html: string) {
-    const data = new Data(html.replace("&nbsp;", "").replace(/^\s*\n/gm, "").split(/\r?\n/))
+    const data = new Data(html.replace(/(&nbsp;)/, "").replace(/^\s*\n/gm, "").split(/\r?\n/))
     // raw data
     let hours = []
     let defaultColspan = 1
@@ -67,13 +67,21 @@ export async function scrape(html: string) {
                 rowspan: rowspan,
                 teachers: []
             }
+            let name = cleanString(next)
+            while (name.includes("&nbsp;")) {
+                name = cleanString(data.nextLine())
+            }
             let lessonData = [
-                cleanString(next) // lesson name
+                name // lesson name
             ]
             line = data.nextLine()
             // get contents of the cell
             while (line !== "</TD>") {
-                if (!line.includes("&nbsp;")) lessonData.push(cleanString(line))
+                if (!line.includes("nbsp;")) {
+                    let cleaned = cleanString(line)
+                    if (cleaned.length > 0) lessonData.push(cleaned)
+                    console.log(cleaned.length)
+                }
                 line = data.nextLine() // teachers & room
             }
             if (lessonData.length===1) {

@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:orario_scuola/util/internet.dart';
 
 class API {
-  static const String url = "http://localhost:8080/";
+  static const String url = "https://api.fede1132.me/school/";
   static final API inst = API();
   bool? _sendAnonData = false;
   String? _anonData;
@@ -30,7 +30,29 @@ class API {
     return APIResponse(success: response["success"], value: response?["token"], code: response?["code"]);
   }
 
-  Future<APIResponse> getSchedule() async {
+  Future<APIResponse> getSchedule(String? type, String? value) async {
+    String? type;
+    if (!(await checkInternetConnection())) {
+      return APIResponse(success: false, code: "internet.not-connected");
+    }
+    var box = await Hive.openBox("settings");
+    if (_sendAnonData == null) {
+      _sendAnonData = box.get("send_anon_data");
+    }
+    if (_sendAnonData! && _anonData == null) {
+      _anonData = await genAnonDataBody();
+    }
+    if (type == null || value == null) {
+      type = box.get("select_type");
+      value = box.get("select_value");
+    }
+    var token = (await Hive.openBox("settings")).get("token");
+    var request = await http.post(Uri.parse("${url}schedule/getSchedule/$type/$value?token=$token"));
+    var response = json.decode(request.body);
+    return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
+  }
+
+  Future<APIResponse> getValues() async {
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
@@ -42,7 +64,7 @@ class API {
       _anonData = await genAnonDataBody();
     }
     var token = (await Hive.openBox("settings")).get("token");
-    var request = await http.post(Uri.parse("${url}schedule/getSchedule/0/1A?token=$token"));
+    var request = await http.post(Uri.parse("${url}schedule/getValues?token=$token"));
     var response = json.decode(request.body);
     return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
   }

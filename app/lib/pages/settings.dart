@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:orario_scuola/components/scaffold.dart';
+import 'package:orario_scuola/pages/select.dart';
 import 'package:orario_scuola/util/localization.dart';
 
 class Settings extends StatefulWidget {
@@ -29,15 +32,36 @@ class _Settings extends State<Settings> {
   bool _teachersNames = false;
   @override
   Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
     return ScaffoldComponent(
       title: AppLocalizations.instance.text("appbar.title.settings"),
-      settings: true,
+      showSettings: false,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
+            Text(AppLocalizations.instance.text("settings.settings_change"), style: theme.textTheme.headline6),
+            ListTile(
+              onTap: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Select()));
+              },
+              title: Text(AppLocalizations.instance.text("settings.change"), style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(AppLocalizations.instance.text("settings.change.desc")),
+              leading: const Icon(Icons.calendar_today),
+            ),
+            ListTile(
+              onTap: () {
+
+              },
+              title: Text(AppLocalizations.instance.text("settings.delete"), style: TextStyle(fontWeight: FontWeight.bold)),
+              subtitle: Text(AppLocalizations.instance.text("settings.delete.desc")),
+              leading: const Icon(Icons.delete),
+            ),
+            //Text(AppLocalizations.instance.text("settings.settings_misc"), style: theme.textTheme.headline6),
+            Divider(),
             SwitchListTile(
-              title: Text(AppLocalizations.instance.text("settings.teachers_names")),
+              title: Text(AppLocalizations.instance.text("settings.teachers_names"), style: TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(AppLocalizations.instance.text("settings.teachers_names.desc")),
               secondary: const Icon(Icons.school),
               value: _teachersNames,

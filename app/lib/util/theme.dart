@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 
 class CustomTheme {
@@ -18,7 +19,10 @@ class CustomTheme {
       }
     }
     return (isDark ? ThemeData.dark() : ThemeData.light()).copyWith(
-      primaryColor: Colors.blue
+      primaryColor: Colors.blue,
+      textTheme: TextTheme(
+        headline6: TextStyle(fontWeight: FontWeight.bold)
+      )
     );
   }
 

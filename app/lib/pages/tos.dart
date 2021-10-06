@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:orario_scuola/components/scaffold.dart';
-import 'package:orario_scuola/pages/home.dart';
+import 'package:orario_scuola/pages/select.dart';
 import 'package:orario_scuola/util/api.dart';
 import 'package:orario_scuola/util/localization.dart';
 
@@ -97,7 +97,7 @@ class _TOS extends State<TOS> {
                         var box = await Hive.openBox("settings");
                         box.put("token", api.value);
                         box.put("send_anon_data", _character == SingingCharacter.yes ? true : false);
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const Home()));
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => const Select()));
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(theme.primaryColor),
@@ -113,5 +113,4 @@ class _TOS extends State<TOS> {
       ),
     );
   }
-
 }

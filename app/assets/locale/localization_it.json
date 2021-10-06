@@ -4,8 +4,22 @@
     "appbar.title.settings": "Impostazioni",
     "appbar.title.select": "Seleziona il tuo orario",
 
+    "settings.settings_change": "Cambia orario",
+    "settings.settings_misc": "Altre impostazioni",
+    "settings.change": "Cambia orario",
+    "settings.change.desc": "Clicca qui per cambiare l'orario (sezione, prof. o aula)",
+    "settings.delete": "Pulisci cache locale",
+    "settings.delete.desc": "Clicca qui per eliminare tutti gli orari salvati sul tuo dispostivo (potranno essere scaricati nuovamente successivamente)\nQuesta operazione e' irriversibile.",
     "settings.teachers_names": "Mostra nomi prof",
     "settings.teachers_names.desc": "Mostra o nasconde i nomi dei professori nelle caselle dell'orario",
+
+    "select.class": "Classe",
+    "select.teacher": "Docente",
+    "select.room": "Aula",
+    "select.schedule.downloading.title": "Recuper nuovo orario...",
+    "select.schedule.downloading": "Download in corso...",
+    "select.schedule.downloaded.title": "Successo!",
+    "select.schedule.downloaded": "Nuovo orario scaricato con successo!",
 
     "textfield.email": "Indirizzo email",
 

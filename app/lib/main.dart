@@ -5,6 +5,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:orario_scuola/pages/home.dart';
 import 'package:orario_scuola/pages/loading.dart';
+import 'package:orario_scuola/pages/select.dart';
 import 'package:orario_scuola/pages/tos.dart';
 import 'package:orario_scuola/util/localization.dart';
 import 'package:orario_scuola/util/theme.dart';
@@ -28,9 +29,14 @@ class _App extends State<App> {
     Future.delayed(Duration.zero, () async {
       theme = await CustomTheme().getTheme();
       var box = await Hive.openBox("settings");
+      var storage = await Hive.openBox("storage");
       setState(() {
         if (!box.containsKey("token")) {
           home = const TOS();
+          return;
+        }
+        if (!storage.containsKey("schedule")) {
+          home = const Select();
           return;
         }
         home = const Home();
