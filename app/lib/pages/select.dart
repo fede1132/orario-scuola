@@ -99,6 +99,8 @@ class _Select extends State<Select> {
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
     return ScaffoldComponent(
+      showSettings: false,
+      showAdmin: false,
       title: AppLocalizations.instance.text("appbar.title.select"),
       child: Column(
         children: <Widget>[

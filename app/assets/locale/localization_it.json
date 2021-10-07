@@ -2,16 +2,12 @@
     "appbar.title.default": "Orario Scuola",
     "appbar.title.tos": "Termini e condizioni",
     "appbar.title.settings": "Impostazioni",
+    "appbar.title.admin": "Impostazioni amministratore",
     "appbar.title.select": "Seleziona il tuo orario",
 
-    "settings.settings_change": "Cambia orario",
-    "settings.settings_misc": "Altre impostazioni",
-    "settings.change": "Cambia orario",
-    "settings.change.desc": "Clicca qui per cambiare l'orario (sezione, prof. o aula)",
-    "settings.delete": "Pulisci cache locale",
-    "settings.delete.desc": "Clicca qui per eliminare tutti gli orari salvati sul tuo dispostivo (potranno essere scaricati nuovamente successivamente)\nQuesta operazione e' irriversibile.",
-    "settings.teachers_names": "Mostra nomi prof",
-    "settings.teachers_names.desc": "Mostra o nasconde i nomi dei professori nelle caselle dell'orario",
+    "tos.check-mail.title": "Codice email",
+    "tos.check-mail": "Controlla la tua casella email, ti abbiamo inviato un codice, inseriscilo nella casella sottostante",
+    "tos.check-mail.wrong": "Codice errato! Riprova.",
 
     "select.class": "Classe",
     "select.teacher": "Docente",
@@ -21,7 +17,24 @@
     "select.schedule.downloaded.title": "Successo!",
     "select.schedule.downloaded": "Nuovo orario scaricato con successo!",
 
+    "settings.settings_change": "Cambia orario",
+    "settings.settings_misc": "Altre impostazioni",
+    "settings.change": "Cambia orario",
+    "settings.change.desc": "Clicca qui per cambiare l'orario (sezione, prof. o aula)",
+    "settings.delete": "Pulisci cache locale",
+    "settings.delete.desc": "Clicca qui per eliminare tutti gli orari salvati sul tuo dispostivo (potranno essere scaricati nuovamente successivamente)\nQuesta operazione e' irriversibile.",
+    "settings.teachers_names": "Mostra nomi prof",
+    "settings.teachers_names.desc": "Mostra o nasconde i nomi dei professori nelle caselle dell'orario",
+    "settings.subject_name": "Mostra materia",
+    "settings.subject_name.desc": "Mostra o nasconde la materia nelle caselle dell'orario",
+
+    "admin.sending.title": "Invio...",
+    "admin.sending": "Invio dati",
+    "admin.success.title": "Successo",
+    "admin.success": "Invio avvenuto con successo",
+
     "textfield.email": "Indirizzo email",
+    "textfield.code": "Codice",
 
     "dialog.close": "Chiudi",
 

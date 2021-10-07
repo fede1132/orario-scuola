@@ -11,7 +11,7 @@ class Database {
         this.db = require('better-sqlite3')('database.db')
         try {
             this.db.prepare('CREATE TABLE IF NOT EXISTS settings ( `schedule_url` TEXT)').run()
-            this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL)').run()
+            this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL, `password` TEXT)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS fail2ban ( `type` INTEGER, `id` TEXT, `time` INTEGER, `unban` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` INTEGER, `code` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS cache (`route` TEXT, `time` INTEGER, `content` TEXT)').run()
@@ -44,7 +44,7 @@ class Database {
         return true;
     }
 
-    getToken(email: string): string {
+    getToken(email: string, auth?: boolean): object {
         const row = this.db.prepare("SELECT * FROM users WHERE `email` = ?").get(email)
         if (row===undefined) {
             var token = null
@@ -53,9 +53,19 @@ class Database {
                 if (this.validToken(token) === true) token = null
             }
             this.db.prepare("INSERT INTO users (email, token) VALUES (?, ?)").run(email, token)
-            return token
+            return {
+                token: token
+            }
         }
-        return row.token
+        if (row.admin !== 1) {
+            return {
+                token: row.token
+            }
+        }
+        return {
+            requireAuth: true,
+            token: auth ? row.token : null
+        }
     }
 
     isAdmin(token: string): boolean | undefined {

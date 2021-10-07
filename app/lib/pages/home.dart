@@ -62,7 +62,17 @@ class _Home extends State<Home> {
         for (var i=0;i<value.length;i++) {
           var data = value[i];
           if (data.length == 0 || data[0]["empty"] == true) {
-            cells.add(const DataCell(Text(""))); 
+            cells.add(
+              DataCell(
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(""),
+                    )
+                  ],
+                )
+              )
+            ); 
             continue;
           }
           // calculate the right row height

@@ -69,18 +69,19 @@ export async function scrape(html: string) {
             }
             let name = cleanString(next)
             while (name.includes("&nbsp;")) {
-                name = cleanString(data.nextLine())
+                line = data.nextLine()
+                if (line === "</TD>") break
+                name = cleanString(line)
             }
             let lessonData = [
                 name // lesson name
             ]
-            line = data.nextLine()
+            if (line !== "</TD>") line = data.nextLine()
             // get contents of the cell
             while (line !== "</TD>") {
                 if (!line.includes("nbsp;")) {
                     let cleaned = cleanString(line)
                     if (cleaned.length > 0) lessonData.push(cleaned)
-                    console.log(cleaned.length)
                 }
                 line = data.nextLine() // teachers & room
             }

@@ -12,7 +12,16 @@ class Schedule {
 
     constructor() {
 
-        this.router.post('/updateSchedule', auth, async (req, res) => {
+        this.router.post('/getUrl', auth, async (req, res) => {
+            let token: string | undefined = <string | undefined>req.query.token
+            if (!db.isAdmin(token!)) {
+                res.status(403).send({success:false, code:"token.not-admin"})
+                return
+            }
+            res.status(200).send({success: true, code:"schedule.updated", url: db.getScheduleUrl()})
+        })
+
+        this.router.post('/updateUrl', auth, async (req, res) => {
             let url: string | undefined = <string | undefined>req.query.url
             let token: string | undefined = <string | undefined>req.query.token
             if (url===undefined) {
@@ -48,8 +57,14 @@ class Schedule {
                 res.status(400).send({success:false, code:"value.invalid"})
                 return
             }
-            const response = await axios.get(`${db.getScheduleUrl()}/${this.types[parseInt(type)]}/${value}${value.endsWith(".html")?"":".html"}`)
-            const scraped = await scrape(response.data)
+            let response;
+            try {
+                response = await axios.get(`${db.getScheduleUrl()}/${this.types[parseInt(type)]}/${value}${value.endsWith(".html")?"":".html"}`);
+            } catch (err: any) {
+                res.status(500).send({success: false, cache: false, code: "remote.error", status: err.response.status, text: err.response.statusText})
+                return
+            }
+            const scraped = await scrape(response?.data)
             db.updateCache(route, JSON.stringify(scraped))
             res.status(200).send({success: true, cache: false, code: "schedule.received", data: scraped})
         })

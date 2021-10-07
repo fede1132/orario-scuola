@@ -1,5 +1,6 @@
 import { Router } from "express"
-import { db } from "../.."
+import { db, fail2ban, mail } from "../.."
+import { genCode } from "../../util/generator"
 
 class AgreeTOS {
     router: Router = Router()
@@ -15,7 +16,18 @@ class AgreeTOS {
                 res.status(400).send({success: false, code: "tos-agreement.invalid"})
                 return
             }
-            let token = db.getToken(email)
+            let token: any = db.getToken(email)
+            if (token?.requireAuth) {
+                if ((await fail2ban.isMailBanned(email))) {
+                    res.status(403).send({success: false, code: "banned.email"})
+                    return
+                }
+                let code = genCode()
+                await mail.sendCode(email, code)
+                db.newMail(email, code)
+                res.status(200).send({success:true, code: "token.check-mail"})
+                return
+            }
             res.status(200).send({success:true, code: "token.received", token: token})
         })
     }
