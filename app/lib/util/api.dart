@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:orario_scuola/util/internet.dart';
 
 class API {
-  static const String url = "http://localhost:8080/";
+  static const String url = "https://api.fede1132.me/school/";
   static final API inst = API();
   bool? _sendAnonData = false;
   String? _anonData;

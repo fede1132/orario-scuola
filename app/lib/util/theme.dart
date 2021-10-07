@@ -4,11 +4,11 @@ import 'package:flutter/widgets.dart';
 import 'package:hive/hive.dart';
 
 class CustomTheme {
+
+  static bool isDark = SchedulerBinding.instance!.window.platformBrightness == Brightness.dark;
   
   Future<ThemeData> getTheme() async {
     var box = await Hive.openBox("settings");
-    var brightness = SchedulerBinding.instance!.window.platformBrightness;
-    bool isDark = brightness == Brightness.dark;
     if (box.containsKey("themeMode")) {
       var themeMode = box.get("themeMode");
       if (themeMode == ThemeMode.dark) {
@@ -21,7 +21,9 @@ class CustomTheme {
     return (isDark ? ThemeData.dark() : ThemeData.light()).copyWith(
       primaryColor: Colors.blue,
       textTheme: TextTheme(
-        headline6: TextStyle(fontWeight: FontWeight.bold)
+        bodyText2: TextStyle(color: isDark ? Colors.white : Colors.black),
+        headline6: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
+        subtitle1: TextStyle(color: isDark ? Colors.white : Colors.black),
       )
     );
   }

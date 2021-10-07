@@ -11,7 +11,7 @@ class Database {
         this.db = require('better-sqlite3')('database.db')
         try {
             this.db.prepare('CREATE TABLE IF NOT EXISTS settings ( `schedule_url` TEXT)').run()
-            this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL, `password` TEXT)').run()
+            this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS fail2ban ( `type` INTEGER, `id` TEXT, `time` INTEGER, `unban` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` INTEGER, `code` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS cache (`route` TEXT, `time` INTEGER, `content` TEXT)').run()

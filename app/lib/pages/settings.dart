@@ -49,7 +49,7 @@ class _Settings extends State<Settings> {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Select()));
               },
-              title: Text(AppLocalizations.instance.text("settings.change"), style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.instance.text("settings.change"), style: theme.textTheme.bodyText2?.copyWith(fontWeight: FontWeight.bold)),
               subtitle: Text(AppLocalizations.instance.text("settings.change.desc")),
               leading: const Icon(Icons.calendar_today),
             ),
@@ -62,14 +62,14 @@ class _Settings extends State<Settings> {
                 Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => TOS()));
               },
-              title: Text(AppLocalizations.instance.text("settings.delete"), style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.instance.text("settings.delete"), style: theme.textTheme.bodyText2?.copyWith(fontWeight: FontWeight.bold)),
               subtitle: Text(AppLocalizations.instance.text("settings.delete.desc")),
               leading: const Icon(Icons.delete),
             ),
             //Text(AppLocalizations.instance.text("settings.settings_misc"), style: theme.textTheme.headline6),
             Divider(),
             SwitchListTile(
-              title: Text(AppLocalizations.instance.text(_isTeacherSchedule ? "settings.subject_name" : "settings.teachers_names"), style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(AppLocalizations.instance.text(_isTeacherSchedule ? "settings.subject_name" : "settings.teachers_names"), style: theme.textTheme.bodyText2?.copyWith(fontWeight: FontWeight.bold)),
               subtitle: Text(AppLocalizations.instance.text(_isTeacherSchedule ? "settings.subject_name.desc" : "settings.teachers_names.desc")),
               secondary: const Icon(Icons.school),
               value: _teachersNames,
