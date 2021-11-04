@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -22,8 +24,10 @@ class CustomTheme {
       primaryColor: Colors.blue,
       textTheme: TextTheme(
         bodyText2: TextStyle(color: isDark ? Colors.white : Colors.black),
+        headline5: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
         headline6: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black),
         subtitle1: TextStyle(color: isDark ? Colors.white : Colors.black),
+        subtitle2: TextStyle(color: isDark ? Colors.white : Colors.black),
       )
     );
   }

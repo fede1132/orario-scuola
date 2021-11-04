@@ -12,6 +12,11 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>Orario Scuola</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

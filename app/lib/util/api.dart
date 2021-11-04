@@ -1,54 +1,48 @@
 import 'dart:io';
-
-import 'package:device_info/device_info.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:orario_scuola/util/internet.dart';
 
 class API {
-  static const String url = "https://api.fede1132.me/school/";
+  static const String url = "http://localhost:8080/";
   static final API inst = API();
-  bool? _sendAnonData = false;
-  String? _anonData;
 
   // fetch token
   Future<APIResponse> getToken(String email, {String? code}) async {
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_anonData == null) {
-      _anonData = await genAnonDataBody();
-    }
     if (code != null) {
-      var request = await http.post(Uri.parse("${url}token/getToken?email=$email&code=$code"), body: _anonData);
+      var request = await http.post(Uri.parse("${url}account/login?email=$email&code=$code"));
       var response = json.decode(request.body);
       return APIResponse(success: response["success"], value: response?["token"], code: response?["code"]);
     }
-    var request = await http.post(Uri.parse("${url}agree-tos/agree-tos?email=$email&agree=true"), body: _anonData);
+    var request = await http.post(Uri.parse("${url}account/login?email=$email&agree=true"));
     var response = json.decode(request.body);
     return APIResponse(success: response["success"], value: response?["token"], code: response?["code"]);
   }
 
   // get desidered schedule
   Future<APIResponse> getSchedule(String? type, String? value) async {
-    String? type;
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_anonData == null) {
-      _anonData = await genAnonDataBody();
-    }
     var box = await Hive.openBox("settings");
-    if (type == null || value == null) {
+    if (type == null) {
       type = box.get("select_type");
+    }
+    if (value == null) {
       value = box.get("select_value");
     }
     var token = (await Hive.openBox("settings")).get("token");
-    var request = await http.post(Uri.parse("${url}schedule/getSchedule/$type/$value?token=$token"), body: _anonData);
-    var response = json.decode(request.body);
-    return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
+    try {
+      var request = await http.post(Uri.parse("${url}schedule/getSchedule/$type/$value?token=$token"));
+      var response = json.decode(request.body);
+      return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
+    } catch (ex) {
+      return APIResponse(success: false, code: "remote.error");
+    }
   }
 
   // get classes, teachers and rooms data
@@ -56,13 +50,14 @@ class API {
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_anonData == null) {
-      _anonData = await genAnonDataBody();
-    }
     var token = (await Hive.openBox("settings")).get("token");
-    var request = await http.post(Uri.parse("${url}schedule/getValues?token=$token"), body: _anonData);
-    var response = json.decode(request.body);
-    return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
+    try {
+      var request = await http.post(Uri.parse("${url}schedule/getValues?token=$token"));
+      var response = json.decode(request.body);
+      return APIResponse(success: response["success"], value: response?["data"], code: response?["code"]);
+    } catch (ex) {
+      return APIResponse(success: false, code: "remote.error");
+    }
   }
 
   // get url
@@ -70,58 +65,44 @@ class API {
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_anonData == null) {
-      _anonData = await genAnonDataBody();
-    }
     var token = (await Hive.openBox("settings")).get("token");
-    var request = await http.post(Uri.parse("${url}schedule/getUrl?token=$token"), body: _anonData);
-    var response = json.decode(request.body);
-    return APIResponse(success: response["success"], value: response?["url"], code: response?["code"]);
+    try {
+      var request = await http.post(Uri.parse("${url}schedule/getUrl?token=$token"));
+      var response = json.decode(request.body);
+      return APIResponse(success: response["success"], value: response?["url"], code: response?["code"]);
+    } catch (ex) {
+      return APIResponse(success: false, code: "remote.error");
+    }
   }
 
-  // get url
+  // update url
   Future<APIResponse> updateUrl(String url) async {
     if (!(await checkInternetConnection())) {
       return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_anonData == null) {
-      _anonData = await genAnonDataBody();
-    }
     var token = (await Hive.openBox("settings")).get("token");
-    var request = await http.post(Uri.parse("${API.url}schedule/updateUrl?token=$token&url=$url"), body: _anonData);
-    var response = json.decode(request.body);
-    return APIResponse(success: response["success"], code: response?["code"]);
+    try {
+      var request = await http.post(Uri.parse("${API.url}schedule/update?token=$token&url=$url"));
+      var response = json.decode(request.body);
+      return APIResponse(success: response["success"], code: response?["code"]);
+    } catch (ex) {
+      return APIResponse(success: false, code: "remote.error");
+    }
   }
 
-  // decide to send or not anon data to the remote server
-  Future<String> genAnonDataBody() async {
-    if (_sendAnonData == null) {
-      var box = await Hive.openBox("settings");
-      _sendAnonData = box.get("send_anon_data");
+  // update
+  Future<APIResponse> update() async {
+    if (!(await checkInternetConnection())) {
+      return APIResponse(success: false, code: "internet.not-connected");
     }
-    if (_sendAnonData! && _anonData == null) {
-      _anonData = await genAnonDataBody();
+    var token = (await Hive.openBox("settings")).get("token");
+    try {
+      var request = await http.post(Uri.parse("${API.url}schedule/update?token=$token"));
+      var response = json.decode(request.body);
+      return APIResponse(success: response["success"], code: response?["code"], value: response?["time"]);
+    } catch (ex) {
+      return APIResponse(success: false, code: "remote.error");
     }
-    var version;
-    var model;
-    var manufacter;
-    if (Platform.isIOS) {
-      var info = await DeviceInfoPlugin().iosInfo;
-      version = info.systemVersion;
-      model = info.model;
-    }
-    if (Platform.isAndroid) {
-      var info = await DeviceInfoPlugin().androidInfo;
-      version = info.version.release;
-      model = info.model;
-      manufacter = info.manufacturer;
-    }
-    var data = {
-      version: version,
-      model: model,
-      manufacter: manufacter
-    };
-    return "";
   }
 }
 

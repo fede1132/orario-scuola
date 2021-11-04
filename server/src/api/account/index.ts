@@ -1,15 +1,23 @@
 import { Router } from "express"
-import { db, mail } from "../../"
+import { db, fail2ban, mail } from "../../"
+import { genCode } from "../../util/generator"
 
-class Token {
+class Account {
     router: Router = Router()
     constructor() {
 
-        this.router.post('/getToken', async (req, res) => {
-            let email: string | undefined = <string | undefined>req.query.email
+        this.router.post('/login', async (req, res) => {
+            let email: string | undefined = <string | undefined>req.query.email?.toString()?.toLowerCase()
             let code: string | undefined = <string | undefined>req.query.code
             if (code === undefined) {
-                res.status(400).send({success: false, code: "code.invalid"})
+                if ((await fail2ban.isMailBanned(email!))) {
+                    res.status(403).send({success: false, code: "banned.email"})
+                    return
+                }
+                let code = genCode()
+                await mail.sendCode(email!, code)
+                db.newMail(email!, code)
+                res.status(200).send({success:true, code: "token.check-mail"})
                 return
             }
             if (email === undefined || !email.endsWith('@gobettire.istruzioneer.it')) {
@@ -18,10 +26,9 @@ class Token {
             }
             let mailCode = db.getMailCode(email!)
             if (mailCode === undefined) {
-                res.status(400).send({success: false, code: "email.not-exists"})
+                res.status(400).send({success: false, code: "code.invalid"})
                 return
             }
-            console.log(mailCode)
             if (mailCode !== parseInt(code)) {
                 res.status(400).send({success: false, code: "code.invalid"})
                 return
@@ -33,4 +40,4 @@ class Token {
     }
 }
 
-export default Token
+export default Account

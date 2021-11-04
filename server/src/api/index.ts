@@ -1,10 +1,8 @@
 import express, { Application, Router } from "express"
 import { fail2ban } from "../"
-import AgreeTOS from "./agree-tos"
 
-import Mail from './mail'
+import Account from "./account"
 import Schedule from './schedule'
-import Token from './token'
 
 class API {
     constructor() {
@@ -13,10 +11,13 @@ class API {
         if (process.argv.indexOf('--v') !== -1) app.use(require('morgan')('combined'))
         if (process.argv.indexOf('--no-fail2ban') === -1) app.use(fail2ban.middleware)
 
-        app.use('/agree-tos', new AgreeTOS().router)
-        app.use('/mail', new Mail().router)
+        app.use('/account', new Account().router)
         app.use('/schedule', new Schedule().router)
-        app.use('/token', new Token().router)
+
+        app.use((err: any, req: any, res: any, next: any) => {
+            console.log(err)
+            res.status(500).send({success: false, cache: false, code: "remote.error", status: err?.response?.status, text: err?.response?.statusText})
+        })
 
         app.listen(parseInt(process.env.PORT!), ()=>console.log(`🔥 HTTP server running and listening on port ${process.env.PORT!}.`))
     }

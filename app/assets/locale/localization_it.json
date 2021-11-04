@@ -1,21 +1,31 @@
 {
+    "generic.yes": "Sì",
+    "generic.no": "No",
+
     "appbar.title.default": "Orario Scuola",
     "appbar.title.tos": "Termini e condizioni",
     "appbar.title.settings": "Impostazioni",
     "appbar.title.admin": "Impostazioni amministratore",
     "appbar.title.select": "Seleziona il tuo orario",
 
+    "tos.welcome": "Benvenuto su",
+    "tos.name": "Orario Gobetti",
+    "tos.join": "Entra in Orario Gobetti",
+    "tos.tos": "Cliccando il bottone sovrastante accetti i\n{%}termini e condizioni{%} e la {$}privacy policy{$}",
+    "tos.email.wrong": "Email errata",
     "tos.check-mail.title": "Codice email",
     "tos.check-mail": "Controlla la tua casella email, ti abbiamo inviato un codice, inseriscilo nella casella sottostante",
     "tos.check-mail.wrong": "Codice errato! Riprova.",
+    "tos.anon-data.desc": "Vuoi inviare report anonimi di errori e crash al fine statistico e miglioramento dell'applicazione?",
 
+    "home.update-available.title": "È disponibile un aggiornamento",
+    "home.update-available": "È disponibile un aggiornamento dell'orario, desideri scaricarlo adesso?",
+    
     "select.class": "Classe",
     "select.teacher": "Docente",
     "select.room": "Aula",
-    "select.schedule.downloading.title": "Recuper nuovo orario...",
-    "select.schedule.downloading": "Download in corso...",
-    "select.schedule.downloaded.title": "Successo!",
-    "select.schedule.downloaded": "Nuovo orario scaricato con successo!",
+    "select.no-match": "NESSUN ELEMENTO TROVATO",
+    "select.available-offline": "Disponibile offline",
 
     "settings.settings_change": "Cambia orario",
     "settings.settings_misc": "Altre impostazioni",
@@ -35,11 +45,22 @@
 
     "textfield.email": "Indirizzo email",
     "textfield.code": "Codice",
+    "textfield.select-search": "Cerca una classe, un docente o un'aula",
 
+    "dialog.schedule.downloading.title": "Recupero nuovo orario...",
+    "dialog.schedule.downloading": "Download in corso...",
+    "dialog.schedule.downloaded.title": "Successo!",
+    "dialog.schedule.downloaded": "Nuovo orario scaricato con successo!",
+    "dialog.email.title": "Inserisci la tua email",
+    "dialog.anon-data.title": "Inviare report anonimi?",
+    "dialog.continue": "Continua",
     "dialog.close": "Chiudi",
 
     "internet.not-connected.title": "Non sei connesso!",
     "internet.not-connected": "Nessun accesso ad internet!\nRiprova quando avrai accesso ad internet!",
+
+    "remote.error.title": "Problemi con il server",
+    "remote.error": "Il server ha risposto con un errore, riprova piu' tardi!",
 
     "email.invalid.title": "Email errata",
     "email.invalid": "Email errata, riprova.",

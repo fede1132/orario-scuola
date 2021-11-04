@@ -4,13 +4,14 @@ import { epochTime } from "../util/epoch"
 import Ban from "./model/ban"
 import Mail from "./model/mail"
 import CachedRoute from "./model/cache"
+import Setting from "./model/setting"
 
 class Database {
     private db
     constructor() {
         this.db = require('better-sqlite3')('database.db')
         try {
-            this.db.prepare('CREATE TABLE IF NOT EXISTS settings ( `schedule_url` TEXT)').run()
+            this.db.prepare('CREATE TABLE IF NOT EXISTS settings ( `key` TEXT, `value` TEXT)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS users ( `email` TEXT, `token` TEXT, `admin` BOOL)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS fail2ban ( `type` INTEGER, `id` TEXT, `time` INTEGER, `unban` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` INTEGER, `code` INTEGER)').run()
@@ -22,18 +23,18 @@ class Database {
 
     // Settings methods
 
-    getScheduleUrl(): string | undefined {
-        let row = this.db.prepare('SELECT schedule_url FROM settings').get()
+    getScheduleUrl(): Setting | undefined {
+        let row = this.db.prepare('SELECT * FROM settings WHERE key = \'schedule_url\'').get()
         if (row===undefined) return undefined
-        return row.schedule_url
+        return new Setting(row.key, JSON.parse(row.value))
     }
 
     updateScheduleUrl(url: string): void {
         if (this.getScheduleUrl()===undefined) {
-            this.db.prepare("INSERT INTO settings (schedule_url) VALUES (?)").run(url)
+            this.db.prepare("INSERT INTO settings (key, value) VALUES ('schedule_url', ?)").run(JSON.stringify({url: url, time: epochTime()}))
             return
         }
-        this.db.prepare("UPDATE settings SET schedule_url = ?").run(url)
+        this.db.prepare("UPDATE settings SET value = ? WHERE key = \'schedule_url\'").run(JSON.stringify({url: url, time: epochTime()}))
     }
 
     // Token methods

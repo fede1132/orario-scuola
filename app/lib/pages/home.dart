@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:orario_scuola/components/scaffold.dart';
+import 'package:orario_scuola/pages/select.dart';
+import 'package:orario_scuola/pages/tos.dart';
+import 'package:orario_scuola/util/api.dart';
+import 'package:orario_scuola/util/internet.dart';
+import 'package:orario_scuola/util/localization.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -41,21 +46,27 @@ class _Home extends State<Home> {
   ];
   @override
   initState() {
-    _loadData();
     super.initState();
   }
 
-  _loadData() {
+  _loadData(BuildContext context) {
     Future.delayed(Duration.zero, () async {
       var box = await Hive.openBox("settings");
       if (box.containsKey("teachers_names")) {
         _teachersNames = box.get("teachers_names");
       }
       if (body.isNotEmpty) body.clear();
+      var settings = await Hive.openBox("settings");
+      var type = settings.get("select_type");
+      var val = settings.get("select_value");
       var storage = await Hive.openBox("storage");
-      var value = storage.get("schedule");
+      var value = storage.get("schedule-$type-$val");
+      if (value == null) {
+        Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => Select()));
+        return;
+      }
       Map<String, int> assigned = {};
-      value.forEach((key, value) {
+      value["data"].forEach((key, value) {
         var cells = <DataCell>[
           DataCell(Text(key, style: const TextStyle(fontWeight: FontWeight.bold))),
         ];
@@ -135,6 +146,114 @@ class _Home extends State<Home> {
       });
       setState(() {
       });
+      if (!(await checkInternetConnection())) return;
+      var api = await API.inst.update();
+      if (!api.success) return;
+      if (value["time"]+(12*3600) > (DateTime.now().millisecondsSinceEpoch/1000).floor()) return;
+      ThemeData theme = Theme.of(context);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(AppLocalizations.instance.text("home.update-available.title")),
+          content: Text(AppLocalizations.instance.text("home.update-available")),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(AppLocalizations.instance.text("generic.no")),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Text(AppLocalizations.instance.text("select.schedule.downloading.title")),
+                    content: Row(
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        SizedBox(width: 10),
+                        Text(AppLocalizations.instance.text("select.schedule.downloading"))
+                      ],
+                    ),
+                  )
+                );
+                var api = await API.inst.getSchedule(type, val);
+                if (!api.success) {
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: Text(AppLocalizations.instance.text("${api.code}.title")),
+                      content: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Text(AppLocalizations.instance.text(api.code!)),
+                          )
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          child: Text(AppLocalizations.instance.text("dialog.close")),
+                          onPressed: () {
+                            if (api.code == "token.invalid") {
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
+                                return const TOS();
+                              }));
+                              return;
+                            }
+                            Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
+                          },
+                        )
+                      ],
+                    )
+                  );
+                  return;
+                }
+                storage.put("schedule-$type-$val", {
+                  "data": api.value,
+                  "time": (DateTime.now().millisecondsSinceEpoch/1000).floor()
+                });
+                Navigator.of(context).pop();
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                    title: Text(AppLocalizations.instance.text("dialog.schedule.downloaded.title")),
+                    content: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(AppLocalizations.instance.text("dialog.schedule.downloaded")),
+                        )
+                      ],
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          body.clear();
+                          setState(() {
+                            
+                          });
+                        },
+                        child: Text(AppLocalizations.instance.text("dialog.close")),
+                      )
+                    ],
+                  )
+                );
+              },
+              child: Text(AppLocalizations.instance.text("generic.yes")),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(theme.primaryColor),
+                overlayColor: MaterialStateProperty.all(theme.textTheme.headline6!.color),
+                shadowColor: MaterialStateProperty.all(theme.splashColor),
+              ),
+            )
+          ],
+        )
+      );
     });
   }
 
@@ -144,10 +263,11 @@ class _Home extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    if (body.length == 0) _loadData(context); 
     return ScaffoldComponent(
       onGoBack: () {
         _rowHeight = 50;
-        _loadData();
+        _loadData(context);
       },
       child: Padding(
         padding: const EdgeInsets.all(10),

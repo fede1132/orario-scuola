@@ -49,7 +49,7 @@ class _Admin extends State<Admin> {
         return;
       }
       setState(() {
-        _urlController.text = api.value;
+        _urlController.text = api.value ?? "";
       });
     });
 

@@ -9,6 +9,8 @@ console.log("✔ Done!")
 console.log("\n+ Copying files to dist dir...")
 fs.copyFileSync('package.json', '.' + path.sep + 'dist' + path.sep + 'package.json')
 console.log("✔ package.json copied!")
-fs.copyFileSync('.env', '.' + path.sep + 'dist' + path.sep + '.env')
-console.log("✔ .env copied!")
+if (fs.existsSync('.env')) {
+    fs.copyFileSync('.env', '.' + path.sep + 'dist' + path.sep + '.env')
+    console.log("✔ .env copied!")
+}
 console.log(`\n😀 Successfully builded ${pkg.name} project!`)

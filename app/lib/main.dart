@@ -35,7 +35,7 @@ class _App extends State<App> {
           home = const TOS();
           return;
         }
-        if (!storage.containsKey("schedule")) {
+        if (!storage.containsKey("schedule-${box.get("select_type")}-${box.get("select_value")}")) {
           home = const Select();
           return;
         }

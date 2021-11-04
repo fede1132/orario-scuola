@@ -15,268 +15,242 @@ class Select extends StatefulWidget {
 }
 
 class _Select extends State<Select> {
-  _loadData() {
-    Future.delayed(Duration.zero, () async {
-      var settings = await Hive.openBox("settings");
-      if (settings.containsKey("select_type")) {
-        _selectedType = settings.get("select_type");
-      }
-      if (settings.containsKey("select_value")) {
-        _selectedValue = settings.get("select_value");
-      }
-      var box = await Hive.openBox("storage");
-      if (box.containsKey("values")) {
-        var value = box.get("values");
-        if (value.time > (DateTime.now().millisecondsSinceEpoch/1000).floor()+3600) {
-          _values = value.values;
-          return;
-        }
-      }
-      var api = await API.inst.getValues();
-      if (!api.success) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: Text(AppLocalizations.instance.text("${api.code}.title")),
-            content: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(AppLocalizations.instance.text(api.code!)),
-                )
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: Text(AppLocalizations.instance.text("dialog.close")),
-                onPressed: () {
-                  if (api.code == "token.invalid") {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
-                      return const TOS();
-                    }));
-                    return;
-                  }
-                  Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
-                },
-              )
-            ],
-          )
-        );
+  _loadData() async {
+    var box = await Hive.openBox("storage");
+    if (box.containsKey("values")) {
+      var value = box.get("values");
+      if (!(await checkInternetConnection()) || (value.time+(12*3600) > (DateTime.now().millisecondsSinceEpoch).floor() && value.time > (await API.inst.update()).value)) {
+        _values = value.values;
         return;
       }
-      var list = api.value;
-      for (var i=0;i<list.length;i++) {
-        _values.add([]);
-        for (var j=0;j<list[i].length;j++) {
-          _values[i].add(DropdownMenuItem(
-            child: Text(list[i][j]),
-            value: list[i][j],
-          ));
+    }
+    var api = await API.inst.getValues();
+    if (!api.success) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(AppLocalizations.instance.text("${api.code}.title")),
+          content: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(AppLocalizations.instance.text(api.code!)),
+              )
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.instance.text("dialog.close")),
+              onPressed: () {
+                if (api.code == "token.invalid") {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
+                    return const TOS();
+                  }));
+                  return;
+                }
+                Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
+              },
+            )
+          ],
+        )
+      );
+      return;
+    }
+    var list = api.value;
+    for (var i=0;i<list.length;i++) {
+      _values.add([]);
+      for (var j=0;j<list[i].length;j++) {
+        _values[i].add(list[i][j]);
+      }
+    }
+    setState(() {
+      
+    });
+  }
+  List<List<String>> _values = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  _download(int i, int j) async {
+    var box = await Hive.openBox("storage");
+    var settings = await Hive.openBox("settings");
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(AppLocalizations.instance.text("dialog.schedule.downloading.title")),
+        content: Row(
+          children: <Widget>[
+            CircularProgressIndicator(),
+            SizedBox(width: 10),
+            Text(AppLocalizations.instance.text("dialog.schedule.downloading"))
+          ],
+        ),
+      )
+    );
+    if (!(await checkInternetConnection())) {
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(AppLocalizations.instance.text("internet.not-connected.title")),
+          content: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(AppLocalizations.instance.text("internet.not-connected")),
+              )
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                var box = await Hive.openBox("storage");
+                if (box.containsKey("schedule-$i-${_values[i][j]}")) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Home()));
+                }
+              },
+              child: Text(AppLocalizations.instance.text("dialog.close")),
+            )
+          ],
+        )
+      );
+      return;
+    }
+    var api = await API.inst.getSchedule(i.toString(), _values[i][j]);
+    if (!api.success) {
+      Navigator.of(context).pop();
+      if (settings.containsKey("select_type")) Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Home()));
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(AppLocalizations.instance.text("${api.code}.title")),
+          content: Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(AppLocalizations.instance.text(api.code!)),
+              )
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(AppLocalizations.instance.text("dialog.close")),
+              onPressed: () {
+                if (api.code == "token.invalid") {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
+                    return const TOS();
+                  }));
+                  return;
+                }
+                Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
+              },
+            )
+          ],
+        )
+      );
+      return;
+    }
+    settings.put("select_type", i.toString());
+    settings.put("select_value", _values[i][j]);
+    box.put("schedule-$i-${_values[i][j]}", {
+      "data": api.value,
+      "time": (DateTime.now().microsecondsSinceEpoch/1000).floor()
+    });
+    Navigator.of(context).pop();
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(AppLocalizations.instance.text("dialog.schedule.downloaded.title")),
+        content: Row(
+          children: <Widget>[
+            Expanded(
+              child: Text(AppLocalizations.instance.text("dialog.schedule.downloaded")),
+            )
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Home()));
+            },
+            child: Text(AppLocalizations.instance.text("dialog.close")),
+          )
+        ],
+      )
+    );
+  }
+
+  _showItems() {
+    Future.delayed(Duration.zero, () async {
+      if (_values.length == 0) await _loadData();
+      List<Widget> result = <Widget>[];
+      for (int i=0;i<_values.length;i++) {
+        for (int j=0;j<_values[i].length;j++) {
+          if (_controller.text.isEmpty || _values[i][j].toLowerCase().contains(_controller.text.toLowerCase())) {
+            var box = await Hive.openBox("storage");
+            result.add(
+              MaterialButton(
+                onPressed: () async {
+                  await _download(i, j);
+                },
+                child: box.containsKey("schedule-$i-${_values[i][j]}") ? Text("${_values[i][j]} (${AppLocalizations.instance.text("select.available-offline")})") : Text("${_values[i][j]}"),
+                color: Colors.blue,
+              )
+            );
+          }
         }
       }
+      if (result.length == 0) {
+        result.add(
+          MaterialButton(
+            color: Colors.red,
+            onPressed: () {
+
+            },
+            child: Text(AppLocalizations.instance.text("select.no-match"), style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+          )
+        );
+      }
+      _items = result;
       setState(() {
         
       });
     });
   }
 
-  String? _selectedType;
-  String? _selectedValue;
-  List<String> _keys = [
-    AppLocalizations.instance.text("select.class"),
-    AppLocalizations.instance.text("select.teacher"),
-    AppLocalizations.instance.text("select.room")
-  ];
-  List<List<DropdownMenuItem<String>>> _values = [];
-
-  @override
-  void initState() {
-    _loadData();
-
-    super.initState();
-  }
-
+  List<Widget> _items = <Widget>[];
+  final TextEditingController _controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    if (_items.isEmpty) _showItems();
     ThemeData theme = Theme.of(context);
     return ScaffoldComponent(
       showSettings: false,
-      showAdmin: false,
       title: AppLocalizations.instance.text("appbar.title.select"),
       child: Column(
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text("Tipo di orario: ", style: theme.textTheme.headline6),
-              DropdownButton(
-                value: _selectedType ?? "0",
-                items: <DropdownMenuItem<String>>[
-                  DropdownMenuItem(
-                    child: Text(_keys[0]),
-                    value: "0",
-                  ),
-                  DropdownMenuItem(
-                    child: Text(_keys[1]),
-                    value: "1",
-                  ),
-                  DropdownMenuItem(
-                    child: Text(_keys[2]),
-                    value: "2",
-                  ),
-                ],
-                onChanged: (String? newVal) async {
-                  _selectedValue = _values[int.parse(newVal!)].first.value;
-                  setState(() {
-                    _selectedType = newVal;
-                  });
-                },
-              )
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text("${_keys[_selectedType == null ? 0 : int.parse(_selectedType!)]}:", style: theme.textTheme.headline6),
-              DropdownButton(
-                items: _values.isEmpty ? <DropdownMenuItem<String>>[] : _values[_selectedType == null ? 0 : int.parse(_selectedType!)],
-                value: _selectedValue ?? (_values.isEmpty ? null : _values[_selectedType == null ? 0 : int.parse(_selectedType!)].first.value),
-                onChanged: (String? newVal) async {
-                  setState(() {
-                    _selectedValue = newVal;
-                  });
-                },
-              )
-            ],
-          ),
-          InkWell(
-            onTap: () async {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Text(AppLocalizations.instance.text("select.schedule.downloading.title")),
-                  content: Row(
-                    children: <Widget>[
-                      CircularProgressIndicator(),
-                      SizedBox(width: 10),
-                      Text(AppLocalizations.instance.text("select.schedule.downloading"))
-                    ],
-                  ),
-                )
-              );
-              if (!(await checkInternetConnection())) {
-                Navigator.of(context).pop();
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text(AppLocalizations.instance.text("internet.not-connected.title")),
-                    content: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(AppLocalizations.instance.text("internet.not-connected")),
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () async {
-                          Navigator.of(context).pop();
-                          var box = await Hive.openBox("storage");
-                          if (box.containsKey("schedule")) {
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Home()));
-                          }
-                        },
-                        child: Text(AppLocalizations.instance.text("dialog.close")),
-                      )
-                    ],
-                  )
-                );
-                return;
-              }
-              var settings = await Hive.openBox("settings");
-              settings.put("select_type", _selectedType ?? "0");
-              settings.put("select_value", _selectedValue ?? _values[int.parse(_selectedType ?? "0")].first.value);
-              var api = await API.inst.getSchedule(_selectedType ?? "0", _selectedValue ?? _values[int.parse(_selectedType ?? "0")].first.value);
-              if (!api.success) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text(AppLocalizations.instance.text("${api.code}.title")),
-                    content: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(AppLocalizations.instance.text(api.code!)),
-                        )
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(AppLocalizations.instance.text("dialog.close")),
-                        onPressed: () {
-                          if (api.code == "token.invalid") {
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
-                              return const TOS();
-                            }));
-                            return;
-                          }
-                          Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
-                        },
-                      )
-                    ],
-                  )
-                );
-                return;
-              }
-              var box = await Hive.openBox("storage");
-              box.put("schedule", api.value);
-              Navigator.of(context).pop();
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (BuildContext context) => AlertDialog(
-                  title: Text(AppLocalizations.instance.text("select.schedule.downloaded.title")),
-                  content: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(AppLocalizations.instance.text("select.schedule.downloaded")),
-                      )
-                    ],
-                  ),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Home()));
-                      },
-                      child: Text(AppLocalizations.instance.text("dialog.close")),
-                    )
-                  ],
-                )
-              );
+          TextField(
+            controller: _controller,
+            onChanged: (String value) {
+              _showItems();
             },
-            child: Container(
-              margin: EdgeInsets.all(10),
-              width: MediaQuery.of(context).size.width,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Center(
-                child: Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.save),
-                    SizedBox(width: 5),
-                    Text("Salva", style: theme.textTheme.headline6)
-                  ],
-                ),
-              ),
+            decoration: InputDecoration(
+              border: const UnderlineInputBorder(),
+              labelText: AppLocalizations.instance.text("textfield.select-search"),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              shrinkWrap: true,
+              children: _items,
             ),
           )
         ],
       ),
     );
   }
-
 }
