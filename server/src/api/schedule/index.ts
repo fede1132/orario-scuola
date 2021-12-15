@@ -4,7 +4,6 @@ import auth from "../../auth"
 import axios from "axios"
 import { scrape, scrapeValues } from "../../scraper"
 import { epochTime } from "../../util/epoch"
-import { nextTick } from "process"
 
 
 class Schedule {
@@ -23,8 +22,8 @@ class Schedule {
         })
 
         this.router.post('/update', auth, async (req, res) => {
-            let token: string | undefined = <string | undefined>req.query.token
-            if (db.isAdmin(token!)) {
+            let token = req.query?.token?.toString()
+            if (token && db.isAdmin(token!)) {
                 let url: string | undefined = <string | undefined>req.query.url
                 if (url !== undefined) {
                     if (url.endsWith("index.html")) {

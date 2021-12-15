@@ -9,8 +9,8 @@
     "appbar.title.select": "Seleziona il tuo orario",
 
     "tos.welcome": "Benvenuto su",
-    "tos.name": "Orario Gobetti",
-    "tos.join": "Entra in Orario Gobetti",
+    "tos.name": "Orario Scuola",
+    "tos.join": "Entra in Orario Scuola",
     "tos.tos": "Cliccando il bottone sovrastante accetti i\n{%}termini e condizioni{%} e la {$}privacy policy{$}",
     "tos.email.wrong": "Email errata",
     "tos.check-mail.title": "Codice email",
@@ -65,9 +65,14 @@
     "email.invalid.title": "Email errata",
     "email.invalid": "Email errata, riprova.",
 
+    "url.not-present.title": "Url non presente",
     "url.not-present": "Url non presente nella richiesta",
 
+    "token.not-admin.title": "Non hai i permessi",
     "token.not-admin": "Non hai i permessi di amministratore!",
+
+    "code.invalid.title": "Codice errato",
+    "code.invalid": "Hai inserito un codice errato, riprova",
 
     "token.invalid.title": "Token errato",
     "token.invalid": "Il server ha riportato un errore riguardante il tuo codice di accesso. Sei pregato di re-inserire la tua email dopo aver premuto \"Chiudi\".",

@@ -16,6 +16,7 @@ class Database {
             this.db.prepare('CREATE TABLE IF NOT EXISTS fail2ban ( `type` INTEGER, `id` TEXT, `time` INTEGER, `unban` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS mails (`email` TEXT, `time` INTEGER, `code` INTEGER)').run()
             this.db.prepare('CREATE TABLE IF NOT EXISTS cache (`route` TEXT, `time` INTEGER, `content` TEXT)').run()
+            console.log("🔥 Database is running.")
         } catch (e) {
             if (e) console.log(`❌ Got an error while trying to use sqlite3 storage! Error:\n${e}`)
         }
@@ -40,37 +41,27 @@ class Database {
     // Token methods
 
     validToken(token: string): boolean {
-        const row = this.db.prepare("SELECT * FROM users WHERE `token` = ?").get(token)
+        const row = this.db.prepare("SELECT * FROM users WHERE `token` = ?").get(encodeURIComponent(token))
         if (row === undefined) return false;
         return true;
     }
 
-    getToken(email: string, auth?: boolean): object {
-        const row = this.db.prepare("SELECT * FROM users WHERE `email` = ?").get(email)
-        if (row===undefined) {
-            var token = null
-            while (token === null) {
-                token = genToken()
-                if (this.validToken(token) === true) token = null
-            }
-            this.db.prepare("INSERT INTO users (email, token) VALUES (?, ?)").run(email, token)
-            return {
-                token: token
-            }
-        }
-        if (row.admin !== 1) {
-            return {
-                token: row.token
-            }
-        }
+    getToken(email: string): object {
+        const row = this.db.prepare("SELECT * FROM users WHERE `email` = ?").get(encodeURIComponent(email))
+        const token = genToken()
+        this.db.prepare(
+            row===undefined ?
+            "INSERT INTO users (token, email) VALUES (?, ?)" :
+            "UPDATE users SET token = ? WHERE `email` = ?"
+        ).run(encodeURIComponent(token), encodeURIComponent(email))
         return {
-            requireAuth: true,
-            token: auth ? row.token : null
+            token,
+            admin: row.admin
         }
     }
 
     isAdmin(token: string): boolean | undefined {
-        const row = this.db.prepare("SELECT admin FROM users WHERE token = ?").get(token)
+        const row = this.db.prepare("SELECT admin FROM users WHERE token = ?").get(encodeURIComponent(token))
         if (row===undefined) return undefined
         return row.admin === 1 ? true : false
     }
@@ -103,7 +94,7 @@ class Database {
     // Mail methods
 
     getMails(email: string): Mail[] | undefined {
-        let rows = this.db.prepare("SELECT * FROM mails WHERE email = ?").all(email)
+        let rows = this.db.prepare("SELECT * FROM mails WHERE email = ?").all(encodeURIComponent(email))
         if (rows === undefined) return rows
         let mails: Mail[] = []
         for (let i in rows) {
@@ -116,29 +107,40 @@ class Database {
 
     newMail(email: string, code: number) {
         if (this.getMails(email) !== undefined) {
-            this.db.prepare("UPDATE mails SET code = null WHERE email = ? AND code NOT null").run(email)
+            this.db.prepare("UPDATE mails SET code = null WHERE email = ? AND code NOT null").run(encodeURIComponent(email))
         }
-        this.db.prepare("INSERT INTO mails (email, time, code) VALUES (?, ?, ?)").run(email, epochTime(), code)
+        this.db.prepare("INSERT INTO mails (email, time, code) VALUES (?, ?, ?)").run(encodeURIComponent(email), epochTime(), code)
     }
 
     getMailCode(email: string): number | undefined {
-        let row = this.db.prepare("SELECT code FROM mails WHERE email = ? AND code NOT null").get(email)
-        return row.code
+        let row = this.db.prepare("SELECT code FROM mails WHERE email = ? AND code NOT null").get(encodeURIComponent(email))
+        return row?.code
     }
 
     // Cache methods
     getCache(route: string): CachedRoute | undefined {
-        let row = this.db.prepare("SELECT * FROM cache WHERE route = ?").get(route)
+        let row = this.db.prepare("SELECT * FROM cache WHERE route = ?").get(encodeURIComponent(route))
         if (row === undefined) return undefined
         return new CachedRoute(row.route, row.time, row.content)
     }
 
     updateCache(route: string, content: string) {
         if (this.getCache(route)===undefined) {
-            this.db.prepare("INSERT INTO cache (route, time, content) VALUES (?, ?, ?)").run(route, epochTime(), content)
+            this.db.prepare("INSERT INTO cache (route, time, content) VALUES (?, ?, ?)").run(encodeURIComponent(route), epochTime(), content)
             return
         }
         this.db.prepare("UPDATE cache SET content = ?, time = ? WHERE route = ?").run(content.toString(), epochTime(), route)
+    }
+
+    // Panic
+    panicClean() {
+        if (process.env.PANIC) {
+            this.db.prepare("DROP TABLE settings").run()
+            this.db.prepare("DROP TABLE users").run()
+            this.db.prepare("DROP TABLE fail2ban").run()
+            this.db.prepare("DROP TABLE mails").run()
+            this.db.prepare("DROP TABLE cache").run()
+        }
     }
 
 }

@@ -227,7 +227,6 @@ class _Select extends State<Select> {
   @override
   Widget build(BuildContext context) {
     if (_items.isEmpty) _showItems();
-    ThemeData theme = Theme.of(context);
     return ScaffoldComponent(
       showSettings: false,
       title: AppLocalizations.instance.text("appbar.title.select"),

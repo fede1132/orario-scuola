@@ -8,6 +8,16 @@ class API {
     constructor() {
         const app: Application = express()
 
+        app.use((req, res, next) => {
+            if (process.env.PANIC) {
+                res.send(500).json({
+                    success: false,
+                    code: "PANIC"
+                })
+                return
+            }
+            next()
+        })
         if (process.argv.indexOf('--v') !== -1) app.use(require('morgan')('combined'))
         if (process.argv.indexOf('--no-fail2ban') === -1) app.use(fail2ban.middleware)
 

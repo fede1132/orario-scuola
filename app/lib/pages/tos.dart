@@ -243,8 +243,8 @@ class _TOS extends State<TOS> {
                                                                               child: Text(AppLocalizations.instance.text("dialog.close")),
                                                                               onPressed: () async {
                                                                                 var box = await Hive.openBox("settings");
-                                                                                box.put("token", api.value);
-                                                                                box.put("admin", true);
+                                                                                box.put("token", api.value["token"]);
+                                                                                box.put("admin", api.value["admin"]);
                                                                                 Navigator.of(context2).popUntil((route) => route.isFirst);
                                                                                 Navigator.of(context2).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => Select()));
                                                                               },
