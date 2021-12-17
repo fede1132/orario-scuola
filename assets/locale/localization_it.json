@@ -1,0 +1,85 @@
+{
+    "generic.yes": "Sì",
+    "generic.no": "No",
+
+    "appbar.title.default": "Orario Scuola",
+    "appbar.title.tos": "Termini e condizioni",
+    "appbar.title.settings": "Impostazioni",
+    "appbar.title.admin": "Impostazioni amministratore",
+    "appbar.title.select": "Seleziona il tuo orario",
+
+    "tos.welcome": "Benvenuto su",
+    "tos.name": "Orario Scuola",
+    "tos.join": "Entra in Orario Scuola",
+    "tos.tos": "Cliccando il bottone sovrastante accetti i\n{%}termini e condizioni{%} e la {$}privacy policy{$}",
+    "tos.email.wrong": "Email errata",
+    "tos.check-mail.title": "Codice email",
+    "tos.check-mail": "Controlla la tua casella email, ti abbiamo inviato un codice, inseriscilo nella casella sottostante",
+    "tos.check-mail.wrong": "Codice errato! Riprova.",
+    "tos.anon-data.desc": "Vuoi inviare report anonimi di errori e crash al fine statistico e miglioramento dell'applicazione?",
+
+    "home.update-available.title": "È disponibile un aggiornamento",
+    "home.update-available": "È disponibile un aggiornamento dell'orario, desideri scaricarlo adesso?",
+    
+    "select.class": "Classe",
+    "select.teacher": "Docente",
+    "select.room": "Aula",
+    "select.no-match": "NESSUN ELEMENTO TROVATO",
+    "select.available-offline": "Disponibile offline",
+
+    "settings.settings_change": "Cambia orario",
+    "settings.settings_misc": "Altre impostazioni",
+    "settings.change": "Cambia orario",
+    "settings.change.desc": "Clicca qui per cambiare l'orario (sezione, prof. o aula)",
+    "settings.delete": "Pulisci cache locale",
+    "settings.delete.desc": "Clicca qui per eliminare tutti gli orari salvati sul tuo dispostivo (potranno essere scaricati nuovamente successivamente)\nQuesta operazione e' irriversibile.",
+    "settings.teachers_names": "Mostra nomi prof",
+    "settings.teachers_names.desc": "Mostra o nasconde i nomi dei professori nelle caselle dell'orario",
+    "settings.subject_name": "Mostra materia",
+    "settings.subject_name.desc": "Mostra o nasconde la materia nelle caselle dell'orario",
+
+    "admin.sending.title": "Invio...",
+    "admin.sending": "Invio dati",
+    "admin.success.title": "Successo",
+    "admin.success": "Invio avvenuto con successo",
+
+    "textfield.email": "Indirizzo email",
+    "textfield.code": "Codice",
+    "textfield.select-search": "Cerca una classe, un docente o un'aula",
+
+    "dialog.schedule.downloading.title": "Recupero nuovo orario...",
+    "dialog.schedule.downloading": "Download in corso...",
+    "dialog.schedule.downloaded.title": "Successo!",
+    "dialog.schedule.downloaded": "Nuovo orario scaricato con successo!",
+    "dialog.email.title": "Inserisci la tua email",
+    "dialog.anon-data.title": "Inviare report anonimi?",
+    "dialog.continue": "Continua",
+    "dialog.close": "Chiudi",
+
+    "internet.not-connected.title": "Non sei connesso!",
+    "internet.not-connected": "Nessun accesso ad internet!\nRiprova quando avrai accesso ad internet!",
+
+    "email.wrong-domain.title": "Dominio email errato",
+    "email.wrong-domain": "Hai effettuato il login con una email che non si trova sonno il dominio @gobettire.istruzioneer.it!\nRiprova selezionando la mail dell'istituto.",
+
+    "remote.error.title": "Problemi con il server",
+    "remote.error": "Il server ha risposto con un errore, riprova piu' tardi!",
+
+    "email.invalid.title": "Email errata",
+    "email.invalid": "Email errata, riprova.",
+
+    "url.not-present.title": "Url non presente",
+    "url.not-present": "Url non presente nella richiesta",
+
+    "token.not-admin.title": "Non hai i permessi",
+    "token.not-admin": "Non hai i permessi di amministratore!",
+
+    "code.invalid.title": "Codice errato",
+    "code.invalid": "Hai inserito un codice errato, riprova",
+
+    "token.invalid.title": "Token errato",
+    "token.invalid": "Il server ha riportato un errore riguardante il tuo codice di accesso. Sei pregato di re-inserire la tua email dopo aver premuto \"Chiudi\".",
+
+    "banned.http": "Ehi.. rallenta! Sei stato bloccato dai nostri server per 1 ora."
+
+}
