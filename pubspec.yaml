@@ -2,7 +2,7 @@ name: orario_scuola
 description: A new Flutter project.
 
 publish_to: 'none'
-version: 2.0.0+1
+version: 2.0.0+4
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
