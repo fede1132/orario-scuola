@@ -1,11 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:orario_scuola/components/scaffold.dart';
 import 'package:orario_scuola/pages/select.dart';
-import 'package:orario_scuola/pages/tos.dart';
-import 'package:orario_scuola/util/api.dart';
+import 'package:http/http.dart' as http;
 import 'package:orario_scuola/util/internet.dart';
 import 'package:orario_scuola/util/localization.dart';
+import 'package:orario_scuola/util/scraper.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -49,7 +51,7 @@ class _Home extends State<Home> {
     super.initState();
   }
 
-  _loadData(BuildContext context) {
+  _loadData(BuildContext context, {bool updated = false}) {
     Future.delayed(Duration.zero, () async {
       var box = await Hive.openBox("settings");
       if (box.containsKey("teachers_names")) {
@@ -146,114 +148,43 @@ class _Home extends State<Home> {
       });
       setState(() {
       });
-      if (!(await checkInternetConnection())) return;
-      var api = await API.inst.update();
-      if (!api.success) return;
-      if (value["time"]+(12*3600) > (DateTime.now().millisecondsSinceEpoch/1000).floor()) return;
-      ThemeData theme = Theme.of(context);
-      showDialog(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: Text(AppLocalizations.instance.text("home.update-available.title")),
-          content: Text(AppLocalizations.instance.text("home.update-available")),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(AppLocalizations.instance.text("generic.no")),
+      if (!(await checkInternetConnection()) || FirebaseAuth.instance.currentUser == null || updated) return;
+      CollectionReference ref = FirebaseFirestore.instance.collection("storage");
+      DocumentSnapshot<dynamic> snapshot = await ref.doc("url").get();
+      if (storage.get("url")["value"] != snapshot.data()["url"]) {
+        storage.put("url", {
+          "value": snapshot.data()["url"],
+          "time": (DateTime.now().millisecondsSinceEpoch/1000).floor()
+        });
+        var type = settings.get("select_type");
+        var val = settings.get("select_value");
+        var body = (await http.get(Uri.parse("${snapshot.data()["url"]}/${["Classi", "Docenti", "Aule"].elementAt(int.parse(type))}/$val.html"))).body;
+        storage.put("schedule-$type-$val", scrape(body));
+        showDialog(
+          barrierDismissible: false,
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: Text(AppLocalizations.instance.text("dialog.schedule.downloaded.title")),
+            content: Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(AppLocalizations.instance.text("dialog.schedule.downloaded")),
+                )
+              ],
             ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text(AppLocalizations.instance.text("select.schedule.downloading.title")),
-                    content: Row(
-                      children: <Widget>[
-                        CircularProgressIndicator(),
-                        SizedBox(width: 10),
-                        Text(AppLocalizations.instance.text("select.schedule.downloading"))
-                      ],
-                    ),
-                  )
-                );
-                var api = await API.inst.getSchedule(type, val);
-                if (!api.success) {
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
                   Navigator.of(context).pop();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                      title: Text(AppLocalizations.instance.text("${api.code}.title")),
-                      content: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(AppLocalizations.instance.text(api.code!)),
-                          )
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          child: Text(AppLocalizations.instance.text("dialog.close")),
-                          onPressed: () {
-                            if (api.code == "token.invalid") {
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
-                                return const TOS();
-                              }));
-                              return;
-                            }
-                            Navigator.pop(context, AppLocalizations.instance.text("dialog.close"));
-                          },
-                        )
-                      ],
-                    )
-                  );
-                  return;
-                }
-                storage.put("schedule-$type-$val", {
-                  "data": api.value,
-                  "time": (DateTime.now().millisecondsSinceEpoch/1000).floor()
-                });
-                Navigator.of(context).pop();
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) => AlertDialog(
-                    title: Text(AppLocalizations.instance.text("dialog.schedule.downloaded.title")),
-                    content: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(AppLocalizations.instance.text("dialog.schedule.downloaded")),
-                        )
-                      ],
-                    ),
-                    actions: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          body.clear();
-                          setState(() {
-                            
-                          });
-                        },
-                        child: Text(AppLocalizations.instance.text("dialog.close")),
-                      )
-                    ],
-                  )
-                );
-              },
-              child: Text(AppLocalizations.instance.text("generic.yes")),
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(theme.primaryColor),
-                overlayColor: MaterialStateProperty.all(theme.textTheme.headline6!.color),
-                shadowColor: MaterialStateProperty.all(theme.splashColor),
-              ),
-            )
-          ],
-        )
-      );
+                  this.body.clear();
+                  _loadData(context, updated: true);
+                },
+                child: Text(AppLocalizations.instance.text("dialog.close")),
+              )
+            ],
+          )
+        );
+      }
     });
   }
 

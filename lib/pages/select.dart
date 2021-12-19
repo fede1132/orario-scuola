@@ -57,19 +57,23 @@ class _Select extends State<Select> {
         ),
       )
     );
-    var data;
-    try {
-      data = (await http.get(Uri.parse("${box.get("url")["value"]}/${["Classi", "Docenti", "Aule"].elementAt(i)}/$j"))).body;
-    } catch (ex) {
-      print(ex);
-      return;
-    }
     settings.put("select_type", i.toString());
     settings.put("select_value", j);
-    box.put("schedule-$i-$j", {
-      "value": scrape(data),
-      "time": (DateTime.now().millisecondsSinceEpoch/1000).floor()
-    });
+    if (await checkInternetConnection()) {
+      var data;
+      try {
+        data = (await http.get(Uri.parse("${box.get("url")["value"]}/${["Classi", "Docenti", "Aule"].elementAt(i)}/$j"))).body;
+      } catch (ex) {
+        print(ex);
+        return;
+      }
+      settings.put("select_type", i.toString());
+      settings.put("select_value", j);
+      box.put("schedule-$i-$j", {
+        "value": scrape(data),
+        "time": (DateTime.now().millisecondsSinceEpoch/1000).floor()
+      });
+    }
     Navigator.of(context).pop();
     showDialog(
       barrierDismissible: false,

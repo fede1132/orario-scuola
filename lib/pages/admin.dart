@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:orario_scuola/components/scaffold.dart';
-import 'package:orario_scuola/pages/tos.dart';
-import 'package:orario_scuola/util/api.dart';
 import 'package:orario_scuola/util/localization.dart';
 
 class Admin extends StatefulWidget {
@@ -59,6 +57,8 @@ class _Admin extends State<Admin> {
                     ),
                   )
                 );
+                var url = _urlController.text.replaceAll(RegExp(r'.*(index.htm).*$'), "");
+                if (!url.endsWith("/")) url += "/";
                 CollectionReference ref = FirebaseFirestore.instance.collection("storage");
                 await ref.doc("url").update({
                   "url": _urlController.text

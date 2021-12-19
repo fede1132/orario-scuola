@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -23,6 +25,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await Hive.initFlutter();
+  await CustomTheme.checkLocal();
   runApp(const App());
 }
 
@@ -30,27 +33,32 @@ class App extends StatefulWidget {
   const App({Key? key}) : super(key: key);
 
   @override
-  State<App> createState() => _App();
+  State<App> createState() => AppState();
 }
 
-class _App extends State<App> {
-
-  @override
-  void initState() {
-    Future.delayed(Duration.zero, () async {
-      var box = await Hive.openBox("settings");
-      var storage = await Hive.openBox("storage");
-      if (await checkInternetConnection() && FirebaseAuth.instance.currentUser != null) {
+class AppState extends State<App> {
+  _checkForDownload() async {
+    var box = await Hive.openBox("settings");
+    var storage = await Hive.openBox("storage");
+    if (await checkInternetConnection() && FirebaseAuth.instance.currentUser != null) {
         if (!storage.containsKey("url") || storage.get("url")["time"]+3600 < (DateTime.now().millisecondsSinceEpoch/1000).floor()) {
           CollectionReference ref = FirebaseFirestore.instance.collection("storage");
-          DocumentSnapshot<dynamic> snapshot = await ref.doc("url").get();
-          if (!snapshot.exists) return;
-          if (snapshot.data()!["url"] != null) {
-            storage.put("url", {
-              "time": (DateTime.now().millisecondsSinceEpoch/1000).floor(),
-              "value": snapshot.data()!["url"]
-            });
-          }  
+          try {
+            DocumentSnapshot<dynamic> snapshot = await ref.doc("url").get();
+            if (!snapshot.exists) return;
+            if (snapshot.data()!["url"] != null) {
+              storage.put("url", {
+                "time": (DateTime.now().millisecondsSinceEpoch/1000).floor(),
+                "value": snapshot.data()!["url"]
+              });
+            }  
+          } catch (ex) {
+            if (ex is FirebaseException) {
+              if (ex.code == "permission-denied") {
+                FirebaseAuth.instance.signOut();
+              }
+            }
+          }
         }
         if (!storage.containsKey("values") || storage.get("values")["time"]+3600 < (DateTime.now().millisecondsSinceEpoch/1000).floor()) {
           try {
@@ -73,34 +81,45 @@ class _App extends State<App> {
           }
         }
       }
-      theme = await CustomTheme().getTheme();
-      setState(() {
-        if (FirebaseAuth.instance.currentUser == null) {
-          home = const TOS();
-          return;
-        }
-        if (!storage.containsKey("schedule-${box.get("select_type")}-${box.get("select_value")}")) {
-          home = const Select();
-          return;
-        }
-        home = const Home();
-      });
-    });
-
-    super.initState();
   }
 
-  ThemeData? theme;
   Widget home = const Loading();
   @override
   Widget build(BuildContext context) {
     if (home is Loading) {
-      FirebaseAuth.instance.authStateChanges().listen((User? user) { 
+      Future.delayed(Duration.zero, () async {
+        var box = await Hive.openBox("settings");
+        var storage = await Hive.openBox("storage");
+        if (FirebaseAuth.instance.currentUser != null) {
+          await _checkForDownload();
+        }
+        setState(() {
+          if (FirebaseAuth.instance.currentUser == null) {
+            home = const TOS();
+            return;
+          }
+          print(storage.containsKey("schedule-${box.get("select_type")}-${box.get("select_value")}"));
+          if (!storage.containsKey("schedule-${box.get("select_type")}-${box.get("select_value")}")) {
+            home = const Select();
+            return;
+          }
+          home = const Home();
+        });
+      });
+      FirebaseAuth.instance.authStateChanges().listen((User? user) async {
         if (user == null) {
+          if (home is Loading) {
+            home = const TOS();
+          }
           return;
         }
-        if (user.email!.endsWith("@gobettire.istruzioneer.it")) {
-          print("right mail :)");
+        if (user.email!.endsWith("@gobettire.istruzioneer.it") || user.email! == "f32.ios.verify@gmail.com") {
+          await _checkForDownload();
+          if (home is Loading || home is TOS) { 
+            setState(() {
+              home = const Select();
+            });
+          }
           return;
         }
         showDialog(context: context, barrierDismissible: false, builder: (BuildContext context) => AlertDialog(
@@ -123,33 +142,45 @@ class _App extends State<App> {
         ));
       });
     }
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Orario Scuola',
-      localizationsDelegates: const [
-        AppLocalizationsDelegate(),
-        GlobalCupertinoLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate
-      ],
-      supportedLocales: const [
-        Locale('it', ''),
-      ],
-      localeResolutionCallback:
-          (Locale? locale, Iterable<Locale> supportedLocales) {
-        for (Locale supportedLocale in supportedLocales) {
-          if (supportedLocale.languageCode == locale!.languageCode ||
-              supportedLocale.countryCode == locale.countryCode) {
-            return supportedLocale;
-          }
-        }
-        return supportedLocales.first;
+    return StreamBuilder(
+      stream: bloc.darkThemeEnabled,
+      initialData: false,
+      builder: (context, snapshot) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Orario Scuola',
+          localizationsDelegates: const [
+            AppLocalizationsDelegate(),
+            GlobalCupertinoLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate
+          ],
+          supportedLocales: const [
+            Locale('it', ''),
+          ],
+          localeResolutionCallback:
+              (Locale? locale, Iterable<Locale> supportedLocales) {
+            for (Locale supportedLocale in supportedLocales) {
+              if (supportedLocale.languageCode == locale!.languageCode ||
+                  supportedLocale.countryCode == locale.countryCode) {
+                return supportedLocale;
+              }
+            }
+            return supportedLocales.first;
+          },
+          theme: CustomTheme.getTheme(),
+          home: home,
+        );
       },
-      theme: theme ?? ThemeData.light(),
-      darkTheme: theme ?? ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      home: home,
     );
   }
 
 }
+
+class Bloc {
+  final _themeController = StreamController<bool>();
+  get changeTheme => _themeController.sink.add;
+  get darkThemeEnabled => _themeController.stream;
+}
+
+final bloc = Bloc();

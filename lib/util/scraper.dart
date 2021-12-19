@@ -96,7 +96,7 @@ dynamic scrape(String html) {
       }
       // format cell data into an object
       lesson["name"] = lessonData[0];
-      for (var i=1;i<lessonData.length-1;i++) {
+      for (int i=1;i<lessonData.length-1;i++) {
           lesson["teachers"]?.add(lessonData[i]);
       }
       // if the lesson name contains "VIDEOLEZIONE" there is no room
@@ -113,21 +113,17 @@ dynamic scrape(String html) {
   dynamic sorted = {
   };
   // fill the array with empty cells, the numbers of cells will be the result of hours.length * 6 (days of the school week)
-  for (var i=0;i<hours.length;i++) {
-    var row = [
-        [],
-        [],
-        [],
-        [],
-        [],
-        []
-    ];
+  for (int i=0;i<hours.length;i++) {
+    var row = [];
+    for (int j=0;j<6;j++) {
+      row.add([]);
+    }
     sorted[hours[i]] = row;
   }
   
   var day = 0;
   // iterate over the hours
-  for (var hour=0;hour<hours.length;hour++) {
+  for (int hour=0;hour<hours.length;hour++) {
     day = 0;
     // iterate over the unsorted lessons
     for (var lesson in unsorted[hour]) {
@@ -146,7 +142,7 @@ dynamic scrape(String html) {
           && sorted[hours[hour]][day-1].length != defaultColspan) {
           --day;
       }
-      for (var i=0;i<lesson["rowspan"];i++) {
+      for (int i=0;i<lesson["rowspan"];i++) {
           sorted[hours[hour+i]][day].add(lesson);
       }
     }
